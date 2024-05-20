@@ -74,5 +74,4 @@ def main():
     st.subheader('Real-Time Data Histogram')
     st.bar_chart(data['Close'])
 
-if __name__ == "__main__":
-    main()
+
