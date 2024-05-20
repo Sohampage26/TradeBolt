@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Function to fetch real-time data from Yahoo Finance
 def get_real_time_data(ticker, interval='1h', period='1d'):
@@ -51,14 +51,20 @@ def hft():
 
     ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
-
-    # Set refresh rate
+    
     refresh_rate = st.slider('Select refresh rate in seconds', 1, 60, 10)
 
-    # Use Streamlit's st_autorefresh to periodically refresh the data
-    st_autorefresh(interval=refresh_rate * 1000, key='data_refresh')
+    # Initialize session state for the last update time
+    if 'last_update' not in st.session_state:
+        st.session_state.last_update = datetime.now()
 
-    data = get_real_time_data(ticker, interval)
+    # Update data if refresh_rate seconds have passed since the last update
+    if datetime.now() - st.session_state.last_update > timedelta(seconds=refresh_rate):
+        data = get_real_time_data(ticker, interval)
+        st.session_state.data = data
+        st.session_state.last_update = datetime.now()
+    else:
+        data = st.session_state.data if 'data' in st.session_state else pd.DataFrame()
 
     if not data.empty and 'Close' in data.columns:
         signals = macd_rsi_divergence_strategy(data)
