@@ -4,17 +4,11 @@ import yfinance as yf
 import streamlit as st
 
 # Function to fetch real-time data from Yahoo Finance
-import streamlit as st
-import pandas as pd
-
 def get_real_time_data(ticker, interval='1h', period='1d'):
-    # Placeholder function for getting real-time data
-    # You can replace this function with your actual data retrieval method
-    # For demonstration purposes, let's generate some random data
-    dates = pd.date_range(start=pd.Timestamp.now()-pd.Timedelta(days=1), periods=24, freq='H')
-    close_prices = np.random.uniform(100, 200, size=24)
-    data = pd.DataFrame({'Date': dates, 'Close': close_prices}).set_index('Date')
-    return data
+    # Using Yahoo Finance to fetch historical market data
+    data = yf.download(tickers=ticker, period=period, interval=interval)
+    data.reset_index(inplace=True)
+    return data[['Datetime', 'Close']].set_index('Datetime')
 
 def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_window=9, rsi_window=14):
     # Calculate MACD
@@ -35,6 +29,9 @@ def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_wi
     # Generate signals based on MACD and RSI divergence
     signals = pd.DataFrame(index=data.index)
     signals['Signal'] = 'HOLD'
+    signals['MACD'] = macd
+    signals['Signal Line'] = signal
+    signals['RSI'] = rsi
 
     # MACD Signal
     signals.loc[macd > signal, 'Signal'] = 'BUY'
@@ -52,27 +49,30 @@ def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_wi
 
     return signals
 
-def hft():
-    st.title('High-Frequency Trading ')
+def main():
+    st.title('High-Frequency Trading Strategy Viewer')
 
     ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
 
     data = get_real_time_data(ticker, interval)
 
+    if data.empty:
+        st.write("No data available for the given ticker and interval.")
+        return
+
     signals = macd_rsi_divergence_strategy(data)
     current_signal = signals['Signal'].iloc[-1]
 
     if current_signal == 'BUY':
-        st.write('Current Signal: ', f'<span style="color:green; font-size:20px;">BUY</span>', unsafe_allow_html=True)
+        st.markdown('**Current Signal: BUY**', unsafe_allow_html=True)
     elif current_signal == 'SELL':
-        st.write('Current Signal: ', f'<span style="color:red; font-size:20px;">SELL</span>', unsafe_allow_html=True)
+        st.markdown('**Current Signal: SELL**', unsafe_allow_html=True)
     else:
-        st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
+        st.markdown('**Current Signal: HOLD**', unsafe_allow_html=True)
 
     st.subheader('Real-Time Data Histogram')
-    if 'Close' in data.columns:
-        st.bar_chart(data['Close'], use_container_width=True)
-    else:
-        st.write("Error: 'Close' column not found in the data.")
+    st.bar_chart(data['Close'])
 
+if __name__ == "__main__":
+    main()
