@@ -16,18 +16,6 @@ def get_real_time_data(ticker, interval='1h', period='1d'):
     data = pd.DataFrame({'Date': dates, 'Close': close_prices}).set_index('Date')
     return data
 
-def get_real_time_data2(ticker, interval='1h'):
-    # Use yfinance to fetch data
-    # Ensure that the period covers from market opening until now
-    now = pd.Timestamp.now()
-    today_start = now.normalize()  # This gets today's date at midnight
-    data = yf.download(ticker, start=today_start.strftime('%Y-%m-%d'), interval=interval)
-    
-    # Ensure data is not empty
-    if data.empty:
-        data = pd.DataFrame({'Close': []})  # If no data is available, create an empty frame
-    return data
-
 def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_window=9, rsi_window=14):
     # Calculate MACD
     exp1 = data['Close'].ewm(span=fast_window, adjust=False).mean()
@@ -71,7 +59,6 @@ def hft():
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
 
     data = get_real_time_data(ticker, interval)
-    data2 = get_real_time_data2(ticker, interval)
 
     signals = macd_rsi_divergence_strategy(data)
     current_signal = signals['Signal'].iloc[-1]
@@ -84,8 +71,8 @@ def hft():
         st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
 
     st.subheader('Real-Time Data Histogram')
-    if 'Close' in data2.columns:
-        st.bar_chart(data2['Close'], use_container_width=True)
+    if 'Close' in data.columns:
+        st.bar_chart(data['Close'], use_container_width=True)
     else:
         st.write("Error: 'Close' column not found in the data.")
 
