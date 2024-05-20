@@ -49,7 +49,7 @@ def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_wi
 
     return signals
 
-def main():
+def hft():
     st.title('High-Frequency Trading Strategy Viewer')
 
     ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
