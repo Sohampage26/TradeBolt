@@ -2,12 +2,18 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import streamlit as st
-from datetime import datetime, timedelta
 
 # Function to fetch real-time data from Yahoo Finance
+import streamlit as st
+import pandas as pd
+
 def get_real_time_data(ticker, interval='1h', period='1d'):
-    # Fetch data using yfinance
-    data = yf.download(tickers=ticker, period=period, interval=interval)
+    # Placeholder function for getting real-time data
+    # You can replace this function with your actual data retrieval method
+    # For demonstration purposes, let's generate some random data
+    dates = pd.date_range(start=pd.Timestamp.now()-pd.Timedelta(days=1), periods=24, freq='H')
+    close_prices = np.random.uniform(100, 200, size=24)
+    data = pd.DataFrame({'Date': dates, 'Close': close_prices}).set_index('Date')
     return data
 
 def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_window=9, rsi_window=14):
@@ -47,39 +53,26 @@ def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_wi
     return signals
 
 def hft():
-    st.title('High-Frequency Trading')
+    st.title('High-Frequency Trading ')
 
     ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
-    
-    refresh_rate = st.slider('Select refresh rate in seconds', 1, 60, 10)
 
-    # Initialize session state for the last update time
-    if 'last_update' not in st.session_state:
-        st.session_state.last_update = datetime.now()
+    data = get_real_time_data(ticker, interval)
 
-    # Update data if refresh_rate seconds have passed since the last update
-    if datetime.now() - st.session_state.last_update > timedelta(seconds=refresh_rate):
-        data = get_real_time_data(ticker, interval)
-        st.session_state.data = data
-        st.session_state.last_update = datetime.now()
+    signals = macd_rsi_divergence_strategy(data)
+    current_signal = signals['Signal'].iloc[-1]
+
+    if current_signal == 'BUY':
+        st.write('Current Signal: ', f'<span style="color:green; font-size:20px;">BUY</span>', unsafe_allow_html=True)
+    elif current_signal == 'SELL':
+        st.write('Current Signal: ', f'<span style="color:red; font-size:20px;">SELL</span>', unsafe_allow_html=True)
     else:
-        data = st.session_state.data if 'data' in st.session_state else pd.DataFrame()
+        st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
 
-    if not data.empty and 'Close' in data.columns:
-        signals = macd_rsi_divergence_strategy(data)
-        current_signal = signals['Signal'].iloc[-1]
-
-        if current_signal == 'BUY':
-            st.write('Current Signal: ', f'<span style="color:green; font-size:20px;">BUY</span>', unsafe_allow_html=True)
-        elif current_signal == 'SELL':
-            st.write('Current Signal: ', f'<span style="color:red; font-size:20px;">SELL</span>', unsafe_allow_html=True)
-        else:
-            st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
-
-        st.subheader('Real-Time Data Line Chart')
-        st.line_chart(data['Close'], use_container_width=True)
+    st.subheader('Real-Time Data Histogram')
+    if 'Close' in data.columns:
+        st.bar_chart(data['Close'], use_container_width=True)
     else:
-        st.write("No data available for the selected ticker and interval.")
-
+        st.write("Error: 'Close' column not found in the data.")
 
