@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import streamlit as st
+from datetime import datetime
 
 # Function to fetch real-time data from Yahoo Finance
 def get_real_time_data(ticker, interval='1h', period='1d'):
@@ -51,29 +52,28 @@ def hft():
     ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
 
-    # Refresh the data periodically to reflect real-time changes
+    # Set refresh rate
     refresh_rate = st.slider('Select refresh rate in seconds', 1, 60, 10)
-    st.write(f'Refreshing every {refresh_rate} seconds')
 
-    # Automatically refresh the data at the specified interval
-    if st.button('Start Refreshing'):
-        st.write(f'Started refreshing {ticker} data every {refresh_rate} seconds.')
-        while True:
-            data = get_real_time_data(ticker, interval)
-            if not data.empty and 'Close' in data.columns:
-                signals = macd_rsi_divergence_strategy(data)
-                current_signal = signals['Signal'].iloc[-1]
+    # Use Streamlit's st_autorefresh to periodically refresh the data
+    st_autorefresh(interval=refresh_rate * 1000, key='data_refresh')
 
-                if current_signal == 'BUY':
-                    st.write('Current Signal: ', f'<span style="color:green; font-size:20px;">BUY</span>', unsafe_allow_html=True)
-                elif current_signal == 'SELL':
-                    st.write('Current Signal: ', f'<span style="color:red; font-size:20px;">SELL</span>', unsafe_allow_html=True)
-                else:
-                    st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
+    data = get_real_time_data(ticker, interval)
 
-                st.subheader('Real-Time Data Line Chart')
-                st.line_chart(data['Close'], use_container_width=True)
-            else:
-                st.write("No data available for the selected ticker and interval.")
-            time.sleep(refresh_rate)
+    if not data.empty and 'Close' in data.columns:
+        signals = macd_rsi_divergence_strategy(data)
+        current_signal = signals['Signal'].iloc[-1]
+
+        if current_signal == 'BUY':
+            st.write('Current Signal: ', f'<span style="color:green; font-size:20px;">BUY</span>', unsafe_allow_html=True)
+        elif current_signal == 'SELL':
+            st.write('Current Signal: ', f'<span style="color:red; font-size:20px;">SELL</span>', unsafe_allow_html=True)
+        else:
+            st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
+
+        st.subheader('Real-Time Data Line Chart')
+        st.line_chart(data['Close'], use_container_width=True)
+    else:
+        st.write("No data available for the selected ticker and interval.")
+
 
