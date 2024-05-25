@@ -59,7 +59,11 @@ def hft():
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
     period = st.selectbox('Select Period', ('1d', '5d', '1mo'))
 
-    data = get_real_time_data(ticker, interval, period)
+    try:
+        data = get_real_time_data(ticker, interval, period)
+    except Exception as e:
+        st.error(f"Error fetching data: {str(e)}")
+        return
 
     # Debug: Show the current time and market status
     current_time = datetime.now()
@@ -85,17 +89,12 @@ def hft():
         # Determine color based on trend
         color = 'green' if data['Close'].iloc[-1] >= data['Close'].iloc[0] else 'red'
 
-        # Convert DataFrame to Altair chart
-        chart_data = data.reset_index()
-        chart = st.line_chart(chart_data, use_container_width=True)
-
-        # Apply line color
-        chart.altair_chart.configure_line(color=color)
+        # Display line chart
+        st.line_chart(data['Close'], use_container_width=True)
 
         if not is_market_open():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
     else:
         st.write("Error: No data retrieved for the given ticker symbol and interval.")
 
-if __name__ == '__main__':
-    hft()
+
