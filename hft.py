@@ -61,6 +61,11 @@ def hft():
 
     data = get_real_time_data(ticker, interval, period)
 
+    # Debug: Show the current time and market status
+    current_time = datetime.now()
+    market_status = "open" if is_market_open() else "closed"
+    st.write(f"Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S')}, Market status: {market_status}")
+
     if not is_market_open():
         st.write("The market is currently closed. Displaying data up to the last market close.")
 
@@ -82,3 +87,6 @@ def hft():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
     else:
         st.write("Error: No data retrieved for the given ticker symbol and interval.")
+
+if __name__ == '__main__':
+    hft()
