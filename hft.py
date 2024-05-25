@@ -11,7 +11,7 @@ def get_real_time_data(ticker, interval='1h', period='1d'):
     # Placeholder function for getting real-time data
     # You can replace this function with your actual data retrieval method
     # For demonstration purposes, let's generate some random data
-    dates = pd.date_range(start=pd.Timestamp.now()-pd.Timedelta(days=1), periods=24, freq='H')
+    dates = pd.date_range(start=pd.Timestamp.now()-pd.Timedelta(days=1), periods=24, freq='h')
     close_prices = np.random.uniform(100, 200, size=24)
     data = pd.DataFrame({'Date': dates, 'Close': close_prices}).set_index('Date')
     return data
