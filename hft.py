@@ -84,7 +84,7 @@ def hft():
 
         # Determine color based on trend
         color = 'green' if data['Close'].iloc[-1] >= data['Close'].iloc[0] else 'red'
-        st.line_chart(data['Close'], use_container_width=True, color=color)
+        st.line_chart(data['Close'], use_container_width=True, line_chart_config={'series': [{'color': color}]})
 
         if not is_market_open():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
