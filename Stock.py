@@ -34,10 +34,18 @@ from keras.optimizers import Adam
 from keras.callbacks import LearningRateScheduler, EarlyStopping
 st.set_page_config(page_title='TradeBolt', layout='wide', page_icon=":mag_right:")
 
+def toggle_theme():
+    if st.button("Toggle Dark Mode"):
+        if st.get_option("theme.theme") == "light":
+            st.set_option('theme', 'dark')
+        else:
+            st.set_option('theme', 'light')
+
 with st.sidebar:
     selected = option_menu("DashBoard", ["Home","Admin", 'Visualization', 'Models', 'Forecasting','HFT'],
                            icons=['house', 'shield','graph-down', 'box', 'diagram-2','graph-up'], menu_icon="cast", default_index=0,
                            styles={"nav-link-selected": {"background-color": "green"}})
+    toggle_theme()
 
 if selected == 'Home':
     show_home_page()
