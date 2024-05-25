@@ -13,12 +13,7 @@ def is_market_open():
 
 # Function to get real-time data without caching
 def get_real_time_data(ticker, interval, period):
-    if not is_market_open():
-        st.write("The market is currently closed. Displaying data up to the last market close.")
-    
-    # Fetch real-time data using yfinance
     data = yf.download(tickers=ticker, period=period, interval=interval)
-    
     return data
 
 def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_window=9, rsi_window=14):
@@ -66,6 +61,9 @@ def hft():
 
     data = get_real_time_data(ticker, interval, period)
 
+    if not is_market_open():
+        st.write("The market is currently closed. Displaying data up to the last market close.")
+
     if not data.empty and 'Close' in data.columns:
         signals = macd_rsi_divergence_strategy(data)
         current_signal = signals['Signal'].iloc[-1]
@@ -84,6 +82,3 @@ def hft():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
     else:
         st.write("Error: No data retrieved for the given ticker symbol and interval.")
-
-if __name__ == '__main__':
-    hft()
