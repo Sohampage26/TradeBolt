@@ -10,3 +10,5 @@ matplotlib==3.7.1
 seaborn==0.12.2
 plotly==5.14.0
 yfinance==0.2.18
+altair==4.1.0
+
