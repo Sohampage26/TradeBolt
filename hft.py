@@ -2,10 +2,20 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import streamlit as st
+from datetime import datetime, timedelta
 
-def get_real_time_data(ticker, interval='1m', period='1d'):
-    # Fetch real-time data using yfinance
-    data = yf.download(tickers=ticker, period=period, interval=interval)
+def get_real_time_data(ticker, interval='1m', period='5d'):
+    # Check if the current day is a weekend (Saturday or Sunday)
+    today = datetime.today().weekday()
+    if today in [5, 6]:  # Saturday (5) or Sunday (6)
+        st.write("The market is closed on weekends. Displaying data from the last available weekday.")
+        # Fetch data from the last available weekday
+        end_date = datetime.today() - timedelta(days=(today - 4))  # Last Friday
+        data = yf.download(tickers=ticker, start=end_date - timedelta(days=4), end=end_date, interval=interval)
+    else:
+        # Fetch real-time data using yfinance
+        data = yf.download(tickers=ticker, period=period, interval=interval)
+    
     return data
 
 def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_window=9, rsi_window=14):
@@ -47,7 +57,7 @@ def macd_rsi_divergence_strategy(data, fast_window=12, slow_window=26, signal_wi
 def hft():
     st.title('High-Frequency Trading ')
 
-    ticker = st.text_input('Enter Ticker Symbol', 'AAPL')
+    ticker = st.text_input('Enter Ticker Symbol', 'RELIANCE.NS')
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
 
     data = get_real_time_data(ticker, interval)
@@ -63,8 +73,8 @@ def hft():
         else:
             st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
 
-        st.subheader('Real-Time Data Histogram')
-        st.bar_chart(data['Close'], use_container_width=True)
+        st.subheader('Real-Time Data Line Graph')
+        st.line_chart(data['Close'], use_container_width=True)
     else:
         st.write("Error: No data retrieved for the given ticker symbol and interval.")
 
