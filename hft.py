@@ -4,6 +4,7 @@ import yfinance as yf
 import streamlit as st
 from datetime import datetime, time
 import altair as alt
+import sys
 
 # Function to check if the market is open
 def is_market_open():
@@ -60,6 +61,9 @@ def hft():
     interval = st.selectbox('Select Interval', ('1m', '5m', '15m', '30m', '1h'))
     period = st.selectbox('Select Period', ('1d', '5d', '1mo'))
 
+    # Redirect stdout to prevent BrokenPipeError
+    sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
+
     data = get_real_time_data(ticker, interval, period)
 
     # Debug: Show the current time and market status
@@ -97,4 +101,7 @@ def hft():
         if not is_market_open():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
     else:
-        st.write("Error: No data retrieved for the given ticker symbol and interval.")
+        st.write("Error: No data retrieved for the given ticker symbol and interval.")
+
+if __name__ == '__main__':
+    hft()
