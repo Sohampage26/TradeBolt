@@ -36,10 +36,27 @@ st.set_page_config(page_title='TradeBolt', layout='wide', page_icon=":mag_right:
 
 def toggle_theme():
     if st.button("Toggle Dark Mode"):
-        if st.get_option("theme.theme") == "light":
-            st.set_option('theme', 'dark')
+        if st.session_state.dark_mode:
+            st.session_state.dark_mode = False
         else:
-            st.set_option('theme', 'light')
+            st.session_state.dark_mode = True
+
+# Check if dark mode is enabled and set appropriate theme
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+if st.session_state.dark_mode:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            color: white;
+            background-color: #1E1E1E;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 with st.sidebar:
     selected = option_menu("DashBoard", ["Home","Admin", 'Visualization', 'Models', 'Forecasting','HFT'],
