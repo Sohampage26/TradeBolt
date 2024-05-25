@@ -4,6 +4,7 @@ import yfinance as yf
 import streamlit as st
 from datetime import datetime, timedelta
 
+@st.cache
 def get_real_time_data(ticker, interval, period):
     # Check if the current day is a weekend (Saturday or Sunday)
     today = datetime.today().weekday()
