@@ -2,22 +2,22 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, time
 
-@st.cache
+# Function to check if the market is open
+def is_market_open():
+    market_open_time = time(9, 15)
+    market_close_time = time(15, 30)
+    current_time = datetime.now().time()
+    return market_open_time <= current_time <= market_close_time
+
+# Function to get real-time data without caching
 def get_real_time_data(ticker, interval, period):
-    # Check if the current day is a weekend (Saturday or Sunday)
-    today = datetime.today().weekday()
-    if today in [5, 6]:  # Saturday (5) or Sunday (6)
-        st.write("The market is closed on weekends. Displaying data from the last available weekday.")
-        # Calculate the last available weekday's date
-        days_to_subtract = today - 4 if today == 5 else today - 5
-        end_date = datetime.today() - timedelta(days=days_to_subtract)
-        start_date = end_date - timedelta(days=4)
-        data = yf.download(tickers=ticker, start=start_date, end=end_date, interval=interval)
-    else:
-        # Fetch real-time data using yfinance
-        data = yf.download(tickers=ticker, period=period, interval=interval)
+    if not is_market_open():
+        st.write("The market is currently closed. Displaying data up to the last market close.")
+    
+    # Fetch real-time data using yfinance
+    data = yf.download(tickers=ticker, period=period, interval=interval)
     
     return data
 
@@ -79,6 +79,9 @@ def hft():
 
         st.subheader('Real-Time Data Line Graph')
         st.line_chart(data['Close'], use_container_width=True)
+        
+        if not is_market_open():
+            st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
     else:
         st.write("Error: No data retrieved for the given ticker symbol and interval.")
 
