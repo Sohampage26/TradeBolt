@@ -81,7 +81,8 @@ def hft():
             st.write('Current Signal: ', f'<span style="color:grey; font-size:20px;">HOLD</span>', unsafe_allow_html=True)
 
         st.subheader('Real-Time Data Line Graph')
-        st.line_chart(data['Close'], use_container_width=True)
+        color = 'green' if data['Close'].iloc[-1] >= data['Close'].iloc[0] else 'red'
+        st.line_chart(data['Close'], use_container_width=True, line_chart_config={'series': [{'color': color}]})
         
         if not is_market_open():
             st.write("Note: The above data is up to the last market close. Data will be updated when the market reopens.")
