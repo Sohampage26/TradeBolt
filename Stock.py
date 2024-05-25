@@ -36,7 +36,7 @@ st.set_page_config(page_title='TradeBolt', layout='wide', page_icon=":mag_right:
 
 with st.sidebar:
     selected = option_menu("DashBoard", ["Home","Admin", 'Visualization', 'Models', 'Forecasting','HFT'],
-                           icons=['house', 'shield','graph-down', 'box-fill', 'diagram-2','graph-up'], menu_icon="cast", default_index=0,
+                           icons=['house', 'shield','graph-down', 'box', 'diagram-2','graph-up'], menu_icon="cast", default_index=0,
                            styles={"nav-link-selected": {"background-color": "green"}})
 
 if selected == 'Home':
